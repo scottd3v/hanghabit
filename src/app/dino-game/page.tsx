@@ -9,6 +9,11 @@ interface PlayerSettings {
   attemptsToday: number;
   lastPlayDate: string;
   highScore: number;
+  bonusUsedToday: boolean;
+  totalSessions: number;
+  lastSessionEnd: number; // timestamp
+  streakDays: number;
+  lastStreakDate: string;
 }
 
 interface GameState {
@@ -43,6 +48,19 @@ const DEFAULT_SETTINGS: PlayerSettings = {
   attemptsToday: 0,
   lastPlayDate: '',
   highScore: 0,
+  bonusUsedToday: false,
+  totalSessions: 0,
+  lastSessionEnd: 0,
+  streakDays: 0,
+  lastStreakDate: '',
+};
+
+// Wellness messages for breaks
+const BREAK_MESSAGES = {
+  shortBreak: { emoji: '⭐', message: "Nice break! You're back!", subtext: "Good balance!" },
+  longBreak: { emoji: '🌟', message: "Great job taking a break!", subtext: "2+ hours away - healthy choice!" },
+  nextDay: { emoji: '🏆', message: "Welcome back!", subtext: "You came back tomorrow - awesome!" },
+  streak: { emoji: '🔥', message: "day streak!", subtext: "You're building great habits!" },
 };
 
 const DEFAULT_PIN = '1234';
@@ -86,11 +104,23 @@ const loadPlayerSettings = (player: string): PlayerSettings => {
   if (typeof window === 'undefined') return DEFAULT_SETTINGS;
   const saved = localStorage.getItem(`dino-${player}`);
   if (!saved) return DEFAULT_SETTINGS;
-  const settings = JSON.parse(saved) as PlayerSettings;
-  // Reset attempts if it's a new day
-  if (settings.lastPlayDate !== getTodayString()) {
+  const settings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) } as PlayerSettings;
+
+  const today = getTodayString();
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+  // Reset attempts and bonus if it's a new day
+  if (settings.lastPlayDate !== today) {
+    // Check for streak continuation
+    if (settings.lastPlayDate === yesterday) {
+      settings.streakDays = (settings.streakDays || 0) + 1;
+    } else if (settings.lastPlayDate && settings.lastPlayDate !== today) {
+      settings.streakDays = 1; // Reset streak if missed a day
+    }
+    settings.lastStreakDate = today;
     settings.attemptsToday = 0;
-    settings.lastPlayDate = getTodayString();
+    settings.bonusUsedToday = false;
+    settings.lastPlayDate = today;
   }
   return settings;
 };
@@ -119,6 +149,10 @@ export default function DinoGamePage() {
   const [showChangePinModal, setShowChangePinModal] = useState(false);
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
+  const [sessionSeconds, setSessionSeconds] = useState(0);
+  const [showWelcomeBack, setShowWelcomeBack] = useState(false);
+  const [welcomeMessage, setWelcomeMessage] = useState<{ emoji: string; message: string; subtext: string } | null>(null);
+  const [showBonusOffer, setShowBonusOffer] = useState(false);
   const [gameState, setGameState] = useState<GameState>({
     isRunning: false,
     isGameOver: false,
@@ -198,11 +232,81 @@ export default function DinoGamePage() {
     const loaded = loadPlayerSettings(player);
     setSettings(loaded);
     setCurrentPlayer(player);
+
+    // Check for welcome back message based on time since last session
+    const now = Date.now();
+    const hoursSinceLastSession = loaded.lastSessionEnd
+      ? (now - loaded.lastSessionEnd) / (1000 * 60 * 60)
+      : 0;
+
+    if (loaded.lastSessionEnd && hoursSinceLastSession >= 2) {
+      if (loaded.streakDays > 1) {
+        setWelcomeMessage({
+          emoji: '🔥',
+          message: `${loaded.streakDays} day streak!`,
+          subtext: "You're building great habits!",
+        });
+      } else if (hoursSinceLastSession >= 24) {
+        setWelcomeMessage(BREAK_MESSAGES.nextDay);
+      } else {
+        setWelcomeMessage(BREAK_MESSAGES.longBreak);
+      }
+      setShowWelcomeBack(true);
+      setTimeout(() => setShowWelcomeBack(false), 4000);
+    }
   }, []);
 
-  // Check remaining attempts
+  // Session timer - tracks time during active play
+  const sessionStartRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!gameState.isRunning) {
+      sessionStartRef.current = null;
+      return;
+    }
+
+    if (!sessionStartRef.current) {
+      sessionStartRef.current = Date.now();
+    }
+
+    const interval = setInterval(() => {
+      if (sessionStartRef.current) {
+        setSessionSeconds(Math.floor((Date.now() - sessionStartRef.current) / 1000));
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [gameState.isRunning]);
+
+  // Energy system calculations
   const remainingAttempts = settings.dailyLimit - settings.attemptsToday;
-  const canPlay = remainingAttempts > 0;
+  const energyPercent = settings.dailyLimit > 0 ? (remainingAttempts / settings.dailyLimit) * 100 : 0;
+  const isEnergyLow = remainingAttempts <= 2 && remainingAttempts > 0;
+  const isEnergyDepleted = remainingAttempts <= 0;
+  const canUseBonus = isEnergyDepleted && !settings.bonusUsedToday;
+  const canPlay = remainingAttempts > 0 || canUseBonus;
+
+  // Get energy bar color based on percentage
+  const getEnergyColor = () => {
+    if (energyPercent > 50) return 'bg-green-500';
+    if (energyPercent > 25) return 'bg-yellow-500';
+    if (energyPercent > 0) return 'bg-orange-500';
+    return 'bg-red-500';
+  };
+
+  // Get session timer color based on duration (changes every 5 minutes)
+  const getTimerColor = () => {
+    if (sessionSeconds < 300) return 'text-green-400'; // 0-5 min
+    if (sessionSeconds < 600) return 'text-yellow-400'; // 5-10 min
+    return 'text-orange-400'; // 10+ min
+  };
+
+  // Format session time
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   // Get difficulty settings
   const difficultyConfig = DIFFICULTY_SETTINGS[settings.difficulty];
@@ -278,18 +382,42 @@ export default function DinoGamePage() {
     setParentPin('');
   };
 
-  // Start game
-  const startGame = useCallback(() => {
-    if (!canPlay || !currentPlayer) return;
+  // Activate bonus session
+  const activateBonusSession = useCallback(() => {
+    if (!currentPlayer || settings.bonusUsedToday) return;
 
-    // Increment attempts
     const newSettings = {
       ...settings,
-      attemptsToday: settings.attemptsToday + 1,
+      bonusUsedToday: true,
+    };
+    setSettings(newSettings);
+    savePlayerSettings(currentPlayer, newSettings);
+    setShowBonusOffer(false);
+  }, [currentPlayer, settings]);
+
+  // Start game
+  const startGame = useCallback(() => {
+    if (!currentPlayer) return;
+
+    // Check if we need to show bonus offer
+    if (isEnergyDepleted && !settings.bonusUsedToday) {
+      setShowBonusOffer(true);
+      return;
+    }
+
+    if (!canPlay) return;
+
+    // If using bonus, don't increment attempts
+    const isUsingBonus = remainingAttempts <= 0 && settings.bonusUsedToday;
+
+    const newSettings = {
+      ...settings,
+      attemptsToday: isUsingBonus ? settings.attemptsToday : settings.attemptsToday + 1,
       lastPlayDate: getTodayString(),
     };
     setSettings(newSettings);
     savePlayerSettings(currentPlayer, newSettings);
+    setSessionSeconds(0);
 
     setGameState({
       isRunning: true,
@@ -306,7 +434,7 @@ export default function DinoGamePage() {
       ],
     });
     lastObstacleRef.current = Date.now();
-  }, [canPlay, currentPlayer, settings]);
+  }, [canPlay, currentPlayer, settings, isEnergyDepleted, remainingAttempts]);
 
   // Jump
   const jump = useCallback(() => {
@@ -344,16 +472,15 @@ export default function DinoGamePage() {
     if (!currentPlayer) return;
 
     const roundedScore = Math.floor(finalScore);
-    if (roundedScore > settings.highScore) {
-      const newSettings = {
-        ...settings,
-        highScore: roundedScore,
-      };
-      // Save to localStorage immediately
-      savePlayerSettings(currentPlayer, newSettings);
-      // Schedule state update
-      setTimeout(() => setSettings(newSettings), 0);
-    }
+    // Save session end and potentially high score
+    const newSettings = {
+      ...settings,
+      lastSessionEnd: Date.now(),
+      totalSessions: (settings.totalSessions || 0) + 1,
+      highScore: roundedScore > settings.highScore ? roundedScore : settings.highScore,
+    };
+    savePlayerSettings(currentPlayer, newSettings);
+    setTimeout(() => setSettings(newSettings), 0);
   }, [currentPlayer, settings]);
 
   // Game loop
@@ -655,9 +782,27 @@ export default function DinoGamePage() {
           </h1>
         </div>
 
+        {/* Welcome Back Badge */}
+        {showWelcomeBack && welcomeMessage && (
+          <div className="glass-pill px-6 py-3 mb-4 animate-fade-in-scale text-center">
+            <div className="text-3xl mb-1">{welcomeMessage.emoji}</div>
+            <div className="text-[var(--text-primary)] font-bold">{welcomeMessage.message}</div>
+            <div className="text-xs text-[var(--text-secondary)]">{welcomeMessage.subtext}</div>
+          </div>
+        )}
+
+        {/* Session Timer - top right, non-distracting */}
+        {gameState.isRunning && (
+          <div className="absolute top-4 right-4 glass-pill px-3 py-1 animate-fade-in">
+            <div className={`text-sm font-mono ${getTimerColor()}`}>
+              {formatTime(sessionSeconds)}
+            </div>
+          </div>
+        )}
+
         {/* Score and Stats */}
         <div
-          className="glass-pill px-6 py-3 mb-6 flex items-center gap-6 cursor-pointer select-none animate-fade-in delay-100"
+          className="glass-pill px-6 py-3 mb-4 flex items-center gap-6 cursor-pointer select-none animate-fade-in delay-100"
           onClick={handleScoreClick}
           title="Click here 7 times for parent mode"
         >
@@ -670,13 +815,43 @@ export default function DinoGamePage() {
             <div className="text-xs text-[var(--text-secondary)]">High Score</div>
             <div className="text-xl font-bold text-[var(--accent-purple)]">{settings.highScore}</div>
           </div>
-          <div className="w-px h-8 bg-[var(--glass-border)]" />
-          <div className="text-center">
-            <div className="text-xs text-[var(--text-secondary)]">Plays Left</div>
-            <div className={`text-xl font-bold ${remainingAttempts <= 3 ? 'text-red-500' : 'text-[var(--accent-green)]'}`}>
-              {remainingAttempts}
-            </div>
+          {settings.streakDays > 1 && (
+            <>
+              <div className="w-px h-8 bg-[var(--glass-border)]" />
+              <div className="text-center">
+                <div className="text-xs text-[var(--text-secondary)]">Streak</div>
+                <div className="text-xl font-bold text-orange-400">🔥 {settings.streakDays}</div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Energy Bar */}
+        <div className="w-full max-w-xs mb-4 animate-fade-in delay-150">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1">
+              <span className="text-base">⚡</span> Energy
+            </span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              {remainingAttempts > 0 ? `${remainingAttempts} plays` : canUseBonus ? '1 bonus!' : 'Recharging...'}
+            </span>
           </div>
+          <div className="h-3 bg-[var(--glass-bg)] rounded-full overflow-hidden border border-[var(--glass-border)]">
+            <div
+              className={`h-full ${getEnergyColor()} transition-all duration-500 ease-out`}
+              style={{ width: `${Math.max(energyPercent, canUseBonus ? 10 : 0)}%` }}
+            />
+          </div>
+          {isEnergyLow && !isEnergyDepleted && (
+            <div className="text-xs text-yellow-400 mt-1 text-center animate-pulse">
+              Energy getting low! Take breaks to recharge.
+            </div>
+          )}
+          {canUseBonus && (
+            <div className="text-xs text-green-400 mt-1 text-center">
+              ⭐ Bonus play available!
+            </div>
+          )}
         </div>
 
         {/* Difficulty Badge */}
@@ -699,13 +874,71 @@ export default function DinoGamePage() {
           />
         </div>
 
-        {/* No plays remaining message */}
+        {/* Energy depleted - gentle message */}
         {!canPlay && (
           <div className="glass px-6 py-4 mt-6 text-center animate-fade-in">
-            <div className="text-2xl mb-2">😴</div>
-            <div className="text-[var(--text-primary)] font-bold">All done for today!</div>
-            <div className="text-sm text-[var(--text-secondary)]">
-              Come back tomorrow for more fun!
+            <div className="text-3xl mb-2">🌙</div>
+            <div className="text-[var(--text-primary)] font-bold">Time to recharge!</div>
+            <div className="text-sm text-[var(--text-secondary)] mt-1">
+              Your energy is resting. Come back later for more fun!
+            </div>
+            <div className="text-xs text-[var(--text-secondary)] mt-3 opacity-75">
+              Taking breaks helps you play better next time!
+            </div>
+          </div>
+        )}
+
+        {/* Bonus Session Offer Modal */}
+        {showBonusOffer && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="glass p-6 max-w-sm w-full animate-fade-in-scale text-center">
+              <div className="text-5xl mb-4">⚡</div>
+              <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">
+                Energy is low!
+              </h3>
+              <p className="text-sm text-[var(--text-secondary)] mb-4">
+                You&apos;ve played a lot today. Would you like to use your special bonus play?
+              </p>
+              <div className="glass-pill inline-block px-4 py-2 mb-4">
+                <span className="text-yellow-400">⭐</span>
+                <span className="text-sm text-[var(--text-secondary)] ml-2">1 bonus play available</span>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowBonusOffer(false)}
+                  className="flex-1 py-3 px-4 rounded-lg bg-[var(--glass-bg)] text-[var(--text-secondary)] hover:bg-[var(--glass-hover)] transition-all"
+                >
+                  Take a Break
+                </button>
+                <button
+                  onClick={() => {
+                    activateBonusSession();
+                    // Now actually start the game
+                    setGameState({
+                      isRunning: true,
+                      isGameOver: false,
+                      score: 0,
+                      dinoY: GROUND_Y,
+                      dinoVelocity: 0,
+                      obstacles: [],
+                      groundOffset: 0,
+                      clouds: [
+                        { x: 100, y: 50 },
+                        { x: 300, y: 80 },
+                        { x: 500, y: 40 },
+                      ],
+                    });
+                    setSessionSeconds(0);
+                    lastObstacleRef.current = Date.now();
+                  }}
+                  className="flex-1 py-3 px-4 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-medium hover:opacity-90 transition-all"
+                >
+                  Use Bonus! ⭐
+                </button>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)] mt-4 opacity-75">
+                This is your only bonus for today. Make it count!
+              </p>
             </div>
           </div>
         )}
