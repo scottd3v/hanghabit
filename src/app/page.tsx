@@ -16,7 +16,7 @@ export default function Home() {
             scottd3v
           </h1>
           <p className="text-zinc-500 mt-3 text-lg">
-            Independent App Developer
+            I make apps for me (and you)
           </p>
         </header>
 
