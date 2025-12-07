@@ -1,7 +1,35 @@
+'use client';
+
 import Image from "next/image";
 import { GlassCard } from "@/components";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import SplitFlapTitle from "@/components/SplitFlapTitle";
 
 export default function Home() {
+  const router = useRouter();
+  const [clickCount, setClickCount] = useState(0);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleNameClick = () => {
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+
+    // Reset click count after 2 seconds of no clicks
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+    }
+    clickTimeoutRef.current = setTimeout(() => {
+      setClickCount(0);
+    }, 2000);
+
+    // Navigate to /dad after 5 clicks
+    if (newCount >= 5) {
+      setClickCount(0);
+      router.push('/dad');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-rich noise-overlay flex flex-col">
       {/* Floating orbs for atmosphere */}
@@ -12,12 +40,10 @@ export default function Home() {
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-16 relative z-10">
         {/* Header */}
         <header className="text-center mb-12 animate-fade-in">
-          <h1 className="text-5xl md:text-6xl font-bold text-gradient tracking-tight">
-            scottd3v
+          <h1 className="text-5xl md:text-6xl font-bold text-gradient tracking-tight mb-6">
+            ScottD3v
           </h1>
-          <p className="text-zinc-500 mt-3 text-lg">
-            I make apps for me (and you)
-          </p>
+          <SplitFlapTitle />
         </header>
 
         {/* Cards */}
@@ -43,8 +69,32 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Contact - Direct email link */}
+          {/* Hank's Computer */}
+          <div className="animate-slide-in delay-300">
+            <GlassCard
+              href="/hank"
+              icon={
+                <span className="text-5xl">🦖</span>
+              }
+              title="Hank's Computer"
+              subtitle="Hank's virtual desktop"
+            />
+          </div>
+
+          {/* Danny's Computer */}
           <div className="animate-slide-in delay-400">
+            <GlassCard
+              href="/danny"
+              icon={
+                <span className="text-5xl">🦕</span>
+              }
+              title="Danny's Computer"
+              subtitle="Danny's virtual desktop"
+            />
+          </div>
+
+          {/* Contact - Direct email link */}
+          <div className="animate-slide-in delay-600">
             <a
               href="mailto:scottd3v@gmail.com"
               className="block"
@@ -80,8 +130,16 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 text-center text-zinc-600 text-sm relative z-10 animate-fade-in delay-600">
-        <p>© 2025 Scott Reed</p>
+      <footer className="py-6 text-center text-zinc-600 text-sm relative z-10 animate-fade-in delay-700">
+        <p>
+          © 2025{' '}
+          <span
+            onClick={handleNameClick}
+            className="cursor-default select-none"
+          >
+            Scott Reed
+          </span>
+        </p>
       </footer>
     </div>
   );
