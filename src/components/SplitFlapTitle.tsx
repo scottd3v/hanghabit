@@ -3,11 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { SplitFlap, Presets } from 'react-split-flap';
 
-// Default titles - can be overridden via localStorage from dad portal
-const DEFAULT_TITLES = [
+// Default titles as strings (stored format) - splits by space for display
+const DEFAULT_TITLES: string[] = [
   'Product Engineer',
   'Full Stack Creator',
-  'Zero-to-One Builder',
+  '0-2-1 Builder',
   'Software Futurist',
   'Pizza Chef',
   'Dad',
@@ -16,7 +16,12 @@ const DEFAULT_TITLES = [
 
 const STORAGE_KEY = 'scottd3v-titles';
 
-// Helper to load titles from localStorage (aliased for dad portal compatibility)
+// Helper to split a title string into words for display
+function splitTitle(title: string): string[] {
+  return title.split(' ').filter(w => w.length > 0);
+}
+
+// Helper to load titles from localStorage
 export function getTitles(): string[] {
   if (typeof window === 'undefined') return DEFAULT_TITLES;
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -55,11 +60,44 @@ export function resetTitles(): void {
 
 export { DEFAULT_TITLES };
 
+// Individual row component that sizes itself
+function SplitFlapRow({ word, containerWidth }: { word: string; containerWidth: number }) {
+  const upperWord = word.toUpperCase();
+  const charCount = upperWord.length;
+
+  // Calculate font size: available width / (chars * char width)
+  // Padding is 32px total (16px each side)
+  const availableWidth = containerWidth - 32;
+  const charWidth = 1.35; // Each char is ~1.35ch with gaps
+  const calculatedSize = availableWidth / (charCount * charWidth);
+  // Clamp between 18px and 48px
+  const fontSize = Math.max(18, Math.min(48, calculatedSize));
+
+  return (
+    <div
+      className="split-flap-row"
+      style={{ '--row-font-size': `${fontSize}px` } as React.CSSProperties}
+    >
+      <SplitFlap
+        value={upperWord}
+        chars={Presets.ALPHANUM}
+        length={charCount}
+        timing={30}
+        hinge
+        theme="dark"
+        size="medium"
+        background="#2a2a2a"
+        fontColor="#e8e4de"
+      />
+    </div>
+  );
+}
+
 export default function SplitFlapTitle() {
   const [titles, setTitles] = useState<string[]>(DEFAULT_TITLES);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
-  const [fontSize, setFontSize] = useState(24);
+  const [containerWidth, setContainerWidth] = useState(320);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,40 +118,33 @@ export default function SplitFlapTitle() {
     return () => clearInterval(interval);
   }, [mounted, titles.length]);
 
-  const currentTitle = titles[currentIndex]?.toUpperCase() || '';
-  const displayLength = currentTitle.length;
-
-  // Calculate font size based on container width and character count
+  // Measure container width
   useEffect(() => {
     if (!mounted || !containerRef.current) return;
 
-    const calculateFontSize = () => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      // Available width minus padding (20px each side)
-      const availableWidth = container.offsetWidth - 40;
-      // Each character is roughly 1.3ch wide (1.1ch + gap)
-      const charWidth = 1.3;
-      // Calculate font size to fill width
-      const calculatedSize = availableWidth / (displayLength * charWidth);
-      // Clamp between 16px and 40px
-      const clampedSize = Math.max(16, Math.min(40, calculatedSize));
-      setFontSize(clampedSize);
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
     };
 
-    calculateFontSize();
-    window.addEventListener('resize', calculateFontSize);
-    return () => window.removeEventListener('resize', calculateFontSize);
-  }, [mounted, displayLength]);
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, [mounted]);
+
+  // Split current title string into words for multi-row display
+  const currentTitleWords = splitTitle(titles[currentIndex] || '');
 
   if (!mounted) {
     // SSR placeholder
     return (
-      <div className="h-10 flex items-center justify-center">
-        <span className="text-zinc-500 text-lg tracking-wider uppercase">
-          {DEFAULT_TITLES[0]}
-        </span>
+      <div className="min-h-[60px] flex flex-col items-center justify-center gap-1">
+        {splitTitle(DEFAULT_TITLES[0]).map((word, i) => (
+          <span key={i} className="text-zinc-500 text-lg tracking-wider uppercase">
+            {word}
+          </span>
+        ))}
       </div>
     );
   }
@@ -121,23 +152,18 @@ export default function SplitFlapTitle() {
   return (
     <div
       ref={containerRef}
-      className="split-flap-wrapper flex justify-center items-center min-h-[56px] w-full"
+      className="split-flap-wrapper flex justify-center items-center w-full"
     >
-      <div
-        className="split-flap-inner"
-        style={{ '--flap-font-size': `${fontSize}px` } as React.CSSProperties}
-      >
-        <SplitFlap
-          value={currentTitle}
-          chars={Presets.ALPHANUM}
-          length={displayLength}
-          timing={30}
-          hinge
-          theme="dark"
-          size="medium"
-          background="#2a2a2a"
-          fontColor="#e8e4de"
-        />
+      <div className="split-flap-inner">
+        <div className="split-flap-stack">
+          {currentTitleWords.map((word, index) => (
+            <SplitFlapRow
+              key={`${currentIndex}-${index}`}
+              word={word}
+              containerWidth={containerWidth}
+            />
+          ))}
+        </div>
       </div>
       <style jsx global>{`
         .split-flap-wrapper {
@@ -148,7 +174,7 @@ export default function SplitFlapTitle() {
         .split-flap-inner {
           display: flex;
           justify-content: center;
-          padding: 10px 16px;
+          padding: 12px 16px;
           background: linear-gradient(180deg, #1f1f1f 0%, #181818 100%);
           border-radius: 12px;
           box-shadow:
@@ -157,9 +183,21 @@ export default function SplitFlapTitle() {
           border: 1px solid rgba(255, 255, 255, 0.06);
         }
 
-        /* Use CSS variable for dynamic font size */
-        .split-flap-inner .split-flap-display {
-          font-size: var(--flap-font-size, 24px) !important;
+        .split-flap-stack {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .split-flap-row {
+          display: flex;
+          justify-content: center;
+        }
+
+        /* Use CSS variable for dynamic font size per row */
+        .split-flap-row .split-flap-display {
+          font-size: var(--row-font-size, 24px) !important;
           gap: 2px !important;
         }
 
@@ -174,14 +212,18 @@ export default function SplitFlapTitle() {
           border-color: #333 !important;
         }
 
-        /* Desktop: allow larger max size */
+        /* Desktop */
         @media (min-width: 640px) {
           .split-flap-inner {
-            padding: 14px 24px;
+            padding: 16px 24px;
             border-radius: 14px;
           }
 
-          .split-flap-inner .split-flap-display {
+          .split-flap-stack {
+            gap: 6px;
+          }
+
+          .split-flap-row .split-flap-display {
             gap: 3px !important;
           }
         }
