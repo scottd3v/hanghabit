@@ -92,9 +92,13 @@ export default function SplitFlapTitle() {
     );
   }
 
+  // Calculate scale for mobile based on title length
+  // Longer titles need smaller flaps to fit
+  const needsScaling = displayLength > 12;
+
   return (
-    <div className="split-flap-wrapper flex justify-center items-center min-h-[56px]">
-      <div className="split-flap-inner">
+    <div className="split-flap-wrapper flex justify-center items-center min-h-[56px] w-full px-4">
+      <div className={`split-flap-inner ${needsScaling ? 'split-flap-scaled' : ''}`}>
         <SplitFlap
           value={currentTitle}
           chars={Presets.ALPHANUM}
@@ -110,23 +114,26 @@ export default function SplitFlapTitle() {
       <style jsx global>{`
         .split-flap-wrapper {
           perspective: 1000px;
+          max-width: 100%;
+          overflow: hidden;
         }
 
         .split-flap-inner {
           display: flex;
           justify-content: center;
-          padding: 10px 20px;
+          padding: 8px 12px;
           background: linear-gradient(180deg, #1f1f1f 0%, #181818 100%);
-          border-radius: 12px;
+          border-radius: 10px;
           box-shadow:
             0 2px 8px rgba(0, 0, 0, 0.3),
             inset 0 1px 0 rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.06);
+          max-width: 100%;
         }
 
         /* Override library styles */
         .split-flap-inner .split-flap {
-          gap: 2px;
+          gap: 1px;
         }
 
         /* Flap cards - warm off-white on dark */
@@ -134,17 +141,47 @@ export default function SplitFlapTitle() {
         .split-flap-inner [class*="Flap"] {
           background: linear-gradient(180deg, #2d2d2d 0%, #2d2d2d 49.5%, #252525 50.5%, #252525 100%) !important;
           color: #e8e4de !important;
-          border-radius: 4px !important;
+          border-radius: 3px !important;
           font-family: 'SF Mono', 'Roboto Mono', 'JetBrains Mono', monospace !important;
           font-weight: 500 !important;
-          letter-spacing: 0.02em;
+          letter-spacing: 0.01em;
         }
 
+        /* Mobile: smaller flaps */
         .split-flap-inner .flap-digit {
-          font-size: 1.1rem !important;
-          min-width: 0.9em !important;
+          font-size: 0.75rem !important;
+          min-width: 0.7em !important;
         }
 
+        /* Scaled down for long titles on mobile */
+        .split-flap-scaled .flap-digit {
+          font-size: 0.65rem !important;
+          min-width: 0.6em !important;
+        }
+
+        /* Tablet and up */
+        @media (min-width: 480px) {
+          .split-flap-inner {
+            padding: 10px 16px;
+            border-radius: 12px;
+          }
+
+          .split-flap-inner .split-flap {
+            gap: 2px;
+          }
+
+          .split-flap-inner .flap-digit {
+            font-size: 0.95rem !important;
+            min-width: 0.85em !important;
+          }
+
+          .split-flap-scaled .flap-digit {
+            font-size: 0.85rem !important;
+            min-width: 0.75em !important;
+          }
+        }
+
+        /* Desktop */
         @media (min-width: 640px) {
           .split-flap-inner {
             padding: 14px 28px;
@@ -158,6 +195,11 @@ export default function SplitFlapTitle() {
           .split-flap-inner .flap-digit {
             font-size: 1.35rem !important;
             min-width: 0.95em !important;
+          }
+
+          .split-flap-scaled .flap-digit {
+            font-size: 1.1rem !important;
+            min-width: 0.85em !important;
           }
         }
       `}</style>
