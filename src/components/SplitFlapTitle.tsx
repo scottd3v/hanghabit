@@ -86,8 +86,8 @@ function SplitFlapRow({ word, containerWidth }: { word: string; containerWidth: 
         hinge
         theme="dark"
         size="medium"
-        background="#2a2a2a"
-        fontColor="#e8e4de"
+        background="#1a1a18"
+        fontColor="#f5f3e7"
       />
     </div>
   );
@@ -175,7 +175,7 @@ export default function SplitFlapTitle() {
           display: flex;
           justify-content: center;
           padding: 12px 16px;
-          background: linear-gradient(180deg, #1f1f1f 0%, #181818 100%);
+          background: linear-gradient(180deg, #1a1a18 0%, #151513 100%);
           border-radius: 12px;
           box-shadow:
             0 2px 8px rgba(0, 0, 0, 0.3),
@@ -202,14 +202,14 @@ export default function SplitFlapTitle() {
         }
 
         .split-flap-inner .split-flap-digit {
-          background: #2a2a2a !important;
-          color: #e8e4de !important;
+          background: #1a1a18 !important;
+          color: #f5f3e7 !important;
           border-radius: 4px !important;
         }
 
         .split-flap-inner .split-flap-part {
-          background: linear-gradient(180deg, #2d2d2d 0%, #2d2d2d 49.5%, #252525 50.5%, #252525 100%) !important;
-          border-color: #333 !important;
+          background: linear-gradient(180deg, #1e1e1c 0%, #1e1e1c 49.5%, #181816 50.5%, #181816 100%) !important;
+          border-color: #2a2a28 !important;
         }
 
         /* Desktop */

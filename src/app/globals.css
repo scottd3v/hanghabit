@@ -1,24 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  /* Clean, sophisticated dark palette */
-  --background: #0f0f0f;
-  --background-elevated: #171717;
-  --background-hover: #1f1f1f;
+  /* Warm dark palette - slightly warmer than pure black */
+  --background: #121210;
+  --background-elevated: #1a1a18;
+  --background-hover: #222220;
 
-  /* Warm cream/off-white text - not harsh white */
-  --text-primary: #e8e4de;
-  --text-secondary: #8a8a8a;
-  --text-muted: #5a5a5a;
+  /* Seuss-inspired cream text - warm, readable */
+  --text-primary: #f5f3e7;
+  --text-secondary: #9a9a8a;
+  --text-muted: #5a5a52;
 
   /* Subtle borders */
   --border: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(255, 255, 255, 0.12);
 
-  /* Minimal accent colors - muted, not neon */
-  --accent-warm: #c9a66b;
+  /* Seuss-inspired accent colors */
+  --accent-coral: #e05a33;      /* Hop on Pop orange/coral */
+  --accent-teal: #1b7b6f;       /* Hop on Pop teal/green */
+  --accent-cream: #f5f3e7;      /* Warm cream */
+
+  /* Functional accents */
+  --accent-warm: var(--accent-coral);
   --accent-blue: #6b8fc9;
-  --accent-green: #6bc98a;
+  --accent-green: var(--accent-teal);
   --accent-red: #c96b6b;
 
   /* Legacy variables for compatibility */
@@ -26,7 +31,7 @@
   --glass-bg: var(--background-elevated);
   --glass-border: var(--border);
   --glass-hover: var(--background-hover);
-  --accent-gold: var(--accent-warm);
+  --accent-gold: var(--accent-coral);
 }
 
 @theme inline {
@@ -175,9 +180,9 @@ body {
   opacity: 0.8;
 }
 
-/* Selection color */
+/* Selection color - coral accent */
 ::selection {
-  background: rgba(201, 166, 107, 0.3);
+  background: rgba(224, 90, 51, 0.3);
   color: var(--text-primary);
 }
 

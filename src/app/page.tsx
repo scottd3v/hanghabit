@@ -40,9 +40,12 @@ export default function Home() {
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-16 relative z-10">
         {/* Header */}
         <header className="text-center mb-12 animate-fade-in">
-          <h1 className="text-5xl md:text-6xl font-bold text-gradient tracking-tight mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-2" style={{ color: 'var(--accent-coral)' }}>
             ScottD3v
           </h1>
+          <p className="text-sm tracking-widest uppercase mb-6" style={{ color: 'var(--accent-teal)' }}>
+            Software Seuss
+          </p>
           <SplitFlapTitle />
         </header>
 
@@ -142,8 +145,14 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 text-center text-zinc-600 text-sm relative z-10 animate-fade-in delay-800">
-        <p>
+      <footer className="py-8 text-center relative z-10 animate-fade-in delay-800">
+        <p
+          className="text-lg italic mb-3"
+          style={{ color: 'var(--accent-teal)' }}
+        >
+          Oh the places we&apos;re going
+        </p>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
           © 2025{' '}
           <span
             onClick={handleNameClick}
