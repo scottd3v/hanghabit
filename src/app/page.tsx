@@ -69,8 +69,20 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hank's Computer */}
+          {/* Dad Hang */}
           <div className="animate-slide-in delay-300">
+            <GlassCard
+              href="https://dadhang.scottd3v.com"
+              icon={
+                <span className="text-5xl">🍻</span>
+              }
+              title="Dad Hang"
+              subtitle="Get the dads together in 30 seconds"
+            />
+          </div>
+
+          {/* Hank's Computer */}
+          <div className="animate-slide-in delay-400">
             <GlassCard
               href="/hank"
               icon={
@@ -82,7 +94,7 @@ export default function Home() {
           </div>
 
           {/* Danny's Computer */}
-          <div className="animate-slide-in delay-400">
+          <div className="animate-slide-in delay-500">
             <GlassCard
               href="/danny"
               icon={
@@ -94,7 +106,7 @@ export default function Home() {
           </div>
 
           {/* Contact - Direct email link */}
-          <div className="animate-slide-in delay-600">
+          <div className="animate-slide-in delay-700">
             <a
               href="mailto:scottd3v@gmail.com"
               className="block"
@@ -130,7 +142,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 text-center text-zinc-600 text-sm relative z-10 animate-fade-in delay-700">
+      <footer className="py-6 text-center text-zinc-600 text-sm relative z-10 animate-fade-in delay-800">
         <p>
           © 2025{' '}
           <span
