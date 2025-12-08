@@ -11,7 +11,6 @@ const DEFAULT_TITLES: string[] = [
   'Software Futurist',
   'Pizza Chef',
   'Dad',
-  'Software Seuss',
 ];
 
 const STORAGE_KEY = 'scottd3v-titles';

@@ -43,8 +43,8 @@ export default function Home() {
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-2" style={{ color: 'var(--accent-coral)' }}>
             ScottD3v
           </h1>
-          <p className="text-sm tracking-widest uppercase mb-6" style={{ color: 'var(--accent-teal)' }}>
-            Software Seuss
+          <p className="text-base italic mb-6" style={{ color: 'var(--accent-teal)' }}>
+            Software Seuss +
           </p>
           <SplitFlapTitle />
         </header>
