@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>OG Image Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #333;
+      padding: 40px;
+    }
+
+    .og-image {
+      width: 1200px;
+      height: 630px;
+      background: #0a0a09;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+    }
+
+    /* Subtle grain texture */
+    .og-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+    }
+
+    /* Subtle radial glow */
+    .og-image::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 600px;
+      background: radial-gradient(ellipse, rgba(212, 175, 106, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .icon {
+      width: 140px;
+      height: 140px;
+      border-radius: 28px;
+      box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(212, 175, 106, 0.1);
+    }
+
+    .text-block {
+      text-align: center;
+    }
+
+    .title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 28px;
+      font-weight: 500;
+      color: rgba(245, 243, 231, 0.6);
+      letter-spacing: 0.02em;
+      margin-bottom: 16px;
+    }
+
+    .tagline {
+      font-family: 'DM Serif Display', serif;
+      font-size: 52px;
+      color: #f5f3e7;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+
+    .tagline-accent {
+      color: #1b7b6f;
+    }
+
+    .hook {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 26px;
+      color: #d4af6a;
+      margin-top: 20px;
+    }
+
+    /* Corner accents */
+    .corner {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border: 2px solid rgba(212, 175, 106, 0.15);
+    }
+
+    .corner-tl {
+      top: 32px;
+      left: 32px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .corner-tr {
+      top: 32px;
+      right: 32px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .corner-bl {
+      bottom: 32px;
+      left: 32px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .corner-br {
+      bottom: 32px;
+      right: 32px;
+      border-left: none;
+      border-top: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="og-image">
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <div class="content">
+      <img src="dead-hang-icon.png" alt="Dead Hang Tracker" class="icon">
+
+      <div class="text-block">
+        <div class="title">Dead Hang Tracker for iOS & Apple Watch</div>
+        <div class="tagline">
+          Decompress your spine.<br>
+          <span class="tagline-accent">Decompress your life.</span>
+        </div>
+        <div class="hook">One minute a day keeps the back pain away.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

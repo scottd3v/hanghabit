@@ -13,19 +13,19 @@ export const metadata: Metadata = {
     description: "Decompress your spine. Decompress your life.",
     images: [
       {
-        url: "/dead-hang-icon.png",
-        width: 512,
-        height: 512,
-        alt: "Dead Hang Tracker app icon",
+        url: "/og-dead-hang.png",
+        width: 1200,
+        height: 630,
+        alt: "Dead Hang Tracker - Decompress your spine. Decompress your life.",
       },
     ],
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Dead Hang Tracker",
     description: "Decompress your spine. Decompress your life.",
-    images: ["/dead-hang-icon.png"],
+    images: ["/og-dead-hang.png"],
   },
 };
 
