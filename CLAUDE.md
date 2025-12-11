@@ -26,10 +26,7 @@ src/app/
 │   ├── page.tsx                  # Portal with password entry (password: his age)
 │   └── dino/page.tsx             # Hank's Dino Jump game
 ├── dino-game/page.tsx            # Redirect page - sends to /hank or /danny
-├── dead-hang-tracker/            # Dead hang tracker app landing page
-│   ├── page.tsx
-│   └── privacy/page.tsx
-└── support/page.tsx              # Support page
+└── support/page.tsx              # Support page (links to app-specific support)
 
 src/components/
 ├── DinoGame.tsx                  # Reusable dino game component with player props
@@ -88,8 +85,12 @@ Chrome Dino-style jumping game with per-player settings.
 **Parent Controls Access:**
 Click the timer in the top-right corner 7 times quickly. Default PIN: `1234` (per player).
 
-### Dead Hang Tracker (`/dead-hang-tracker`)
-Landing page for the iOS/watchOS dead hang tracker app (separate project).
+### Support (`/support`)
+General support page with email contact and links to app-specific support pages (e.g., hanghabit.com/support).
+
+## Related Projects
+
+- **Hang Habit** (hanghabit.com) - Dead hang tracker app landing page, privacy policy, and support. Separate repo at `~/Projects/hanghabit`.
 
 ## Commands
 

@@ -3,7 +3,7 @@ import { GlassCard } from "@/components";
 
 export const metadata = {
   title: "Support - scottd3v",
-  description: "Get help and support for scottd3v apps.",
+  description: "Get help and support for scottd3v projects.",
 };
 
 export default function Support() {
@@ -31,7 +31,7 @@ export default function Support() {
           <div className="grid gap-4 mb-10">
             <a href="mailto:scottd3v@gmail.com">
               <GlassCard
-                icon={<span className="text-2xl">✉️</span>}
+                icon={<span className="text-2xl">&#x2709;&#xFE0F;</span>}
                 title="Email Support"
                 subtitle="scottd3v@gmail.com"
                 size="wide"
@@ -39,63 +39,22 @@ export default function Support() {
             </a>
           </div>
 
-          {/* FAQ Section */}
+          {/* App-specific support links */}
           <h2 className="text-xl font-semibold text-white mb-4">
-            Frequently Asked Questions
+            App Support
           </h2>
-          <div className="glass p-6 space-y-6">
-            <div>
-              <h3 className="text-lg font-medium text-white mb-2">
-                How do I start a dead hang session?
+          <div className="glass p-6 space-y-4">
+            <a
+              href="https://hanghabit.com/support"
+              className="block p-4 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors"
+            >
+              <h3 className="text-lg font-medium text-white mb-1">
+                Hang Habit
               </h3>
-              <p className="text-zinc-300 leading-relaxed">
-                Open the app on your Apple Watch, then tap the Start button.
-                The timer will begin when you&apos;re ready. Tap again to stop when you
-                release the bar.
+              <p className="text-zinc-400 text-sm">
+                Support for the dead hang tracker iOS & Apple Watch app
               </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-medium text-white mb-2">
-                Is my data backed up?
-              </h3>
-              <p className="text-zinc-300 leading-relaxed">
-                Your data is stored locally on your device and included in your
-                iCloud backup if you have iCloud Backup enabled for your iPhone.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-medium text-white mb-2">
-                Can I sync between devices?
-              </h3>
-              <p className="text-zinc-300 leading-relaxed">
-                Currently, data is stored locally on each device. Your iPhone and
-                Apple Watch share data through the Watch connectivity framework.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-medium text-white mb-2">
-                How do I delete my data?
-              </h3>
-              <p className="text-zinc-300 leading-relaxed">
-                You can clear all data from the Settings screen within the app,
-                or by uninstalling and reinstalling the app.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-medium text-white mb-2">
-                I denied Health data access. How do I fix it?
-              </h3>
-              <p className="text-zinc-300 leading-relaxed">
-                If you declined to share Health data when first prompted, the app
-                won&apos;t ask again. The only way to fix this is to uninstall the app
-                and reinstall it. On the fresh install, you&apos;ll get the Health
-                permissions prompt again.
-              </p>
-            </div>
+            </a>
           </div>
         </div>
       </main>

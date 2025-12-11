@@ -51,22 +51,22 @@ export default function Home() {
 
         {/* Cards */}
         <div className="w-full max-w-md space-y-4">
-          {/* Dead Hang Tracker - Featured App */}
+          {/* Hang Habit - Featured App */}
           <div className="animate-slide-in delay-200">
             <div className="featured-glow">
               <GlassCard
-                href="/dead-hang-tracker"
+                href="https://hanghabit.com"
                 icon={
                   <Image
-                    src="/dead-hang-icon-180.png"
-                    alt="Dead Hang Tracker"
+                    src="/hang-habit-icon-180.png"
+                    alt="Hang Habit"
                     width={56}
                     height={56}
                     className="rounded-xl"
                   />
                 }
-                title="Dead Hang Tracker"
-                subtitle="Track your grip strength progress on iOS & Apple Watch"
+                title="Hang Habit"
+                subtitle="Dead hang tracker for iOS & Apple Watch"
                 isActive
               />
             </div>
